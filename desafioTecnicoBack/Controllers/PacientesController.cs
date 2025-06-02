@@ -1,5 +1,6 @@
 ﻿using desafioTecnicoBack.Context;
 using desafioTecnicoBack.Models;
+using desafioTecnicoBack.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,72 +10,48 @@ namespace desafioTecnicoBack.Controllers
     [ApiController]
     public class PacientesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IPacienteRepository _repository;
 
-        public PacientesController(AppDbContext context)
+        public PacientesController(IPacienteRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Paciente>> Get()
         {
-            
-            var pacientes = _context.Pacientes.ToList();
-            if (pacientes.Count == 0)
-            {
-                return NotFound("Nenhum Paciente Encontrado");
-            }
-            return pacientes;
+            var pacientes = _repository.GetPacientes();
+            return Ok(pacientes);
         }
 
         [HttpGet("{id:int}", Name = "ObterPaciente")]
         public ActionResult<Paciente> Get(int id)
         {
-            var paciente = _context.Pacientes.FirstOrDefault(p => p.PacienteId == id);
-            if (paciente is null)
-            {
-                return NotFound("Nenhum Paciente Encontrado");
-            }
-            return paciente;
+            var paciente = _repository.GetPaciente(id);
+            return Ok(paciente);
         }
 
         [HttpPost]
         public ActionResult Post(Paciente paciente)
         {
-            if (paciente is null)
-                return BadRequest();
+            var pacienteCriado = _repository.Create(paciente);
 
-            _context.Pacientes.Add(paciente);
-            _context.SaveChanges();
-
-            return new CreatedAtRouteResult("ObterPaciente", new { id = paciente.PacienteId }, paciente);
+            return new CreatedAtRouteResult("ObterPaciente", new { id = pacienteCriado.PacienteId }, pacienteCriado);
         }
 
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, Paciente paciente)
         {
-            if (id != paciente.PacienteId)
-            {
-                return BadRequest();
-            }
-            _context.Entry(paciente).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            _context.SaveChanges();
+            _repository.Update(paciente);
             return Ok(paciente);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var paciente = _context.Pacientes.FirstOrDefault(p => p.PacienteId == id);
-            if (paciente is null)
-            {
-                return NotFound("Paciente Não Encontrado");
-            }
-            _context.Pacientes.Remove(paciente);
-            _context.SaveChanges();
+            var pacitenteExcluido = _repository.Delete(id);
 
-            return Ok(paciente);
+            return Ok(pacitenteExcluido);
         }
     }
 }

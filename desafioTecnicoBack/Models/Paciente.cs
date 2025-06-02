@@ -31,6 +31,7 @@ namespace desafioTecnicoBack.Models
         public string? NumeroCarteirinha { get; set; }
         [StringLength(6)]
         public string? ValidadeCarteirinha { get; set; }
+        public bool? Ativo { get; set; }
 
     }
 }
