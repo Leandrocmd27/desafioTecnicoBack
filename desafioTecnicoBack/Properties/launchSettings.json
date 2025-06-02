@@ -9,6 +9,7 @@
     }
   },
   "profiles": {
+    "applicationUrl": null,
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
